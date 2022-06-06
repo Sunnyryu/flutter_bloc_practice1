@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bloc_lecture1/bloc/todo_bloc.dart';
+import 'package:flutter_bloc_lecture1/bloc/todo_cubit.dart';
 import 'package:flutter_bloc_lecture1/bloc/todo_event.dart';
 import 'package:flutter_bloc_lecture1/bloc/todo_state.dart';
 import 'package:flutter_bloc_lecture1/repository/todo_repository.dart';
@@ -16,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TodoBloc(repository: TodoRepository()),
+      create: (_) => TodoCubit(repository: TodoRepository()),
       child: HomeWidget(),
     );
   }
@@ -36,9 +37,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     super.initState();
     // ListTodosEvent
-    BlocProvider.of<TodoBloc>(context).add(
-      ListTodosEvent(),
-    );
+    BlocProvider.of<TodoCubit>(context).listTodo();
   }
 
   @override
@@ -64,7 +63,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               height: 16.0,
             ),
             Expanded(
-              child: BlocBuilder<TodoBloc, TodoState>(builder: (_, state) {
+              child: BlocBuilder<TodoCubit, TodoState>(builder: (_, state) {
                 if (state is Empty) {
                   return Container();
                 } else if (state is Loading) {
@@ -88,9 +87,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                             GestureDetector(
                               child: const Icon(Icons.delete),
                               onTap: () {
-                                BlocProvider.of<TodoBloc>(context).add(
-                                  DeleteTodoEvent(todo: item),
-                                );
+                                BlocProvider.of<TodoCubit>(context)
+                                    .deleteTodo(item);
                               },
                             ),
                           ],
@@ -109,9 +107,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.read<TodoBloc>().add(
-                CreateTodoEvent(title: this.title),
-              );
+          context.read<TodoCubit>().createTodo(this.title);
         },
         child: const Icon(Icons.edit),
       ),
